@@ -47,14 +47,14 @@ class CompileWorker(QThread):
 # ===================== CTK Runtime =====================
 # Modi icin CustomTkinter yardimci katmani
 
-CTK_RUNTIME = r'''import sys, subprocess
+CTK_RUNTIME = r'''import sys, subprocess, os
 
-# Otomatik customtkinter kurulumu
+# Otomatik customtkinter kurulumu (sessiz)
 try:
     import customtkinter as _ctk
 except ImportError:
-    subprocess.run([sys.executable, "-m", "pip", "install", "customtkinter"],
-                   check=True, capture_output=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", "customtkinter", "-q"],
+                   check=True)
     import customtkinter as _ctk
 
 # --- Tema / Pencere ---
@@ -69,8 +69,16 @@ def window(title, width, height, theme="dark"):
     set_theme(theme)
     app = _ctk.CTk()
     app.title(str(title))
-    app.geometry(f"{width}x{height}")
+    app.geometry(f"{int(width)}x{int(height)}")
     return app
+
+def popup(title, width=320, height=240):
+    """Ikincil/iletisim penceresi olustur."""
+    win = _ctk.CTkToplevel()
+    win.title(str(title))
+    win.geometry(f"{int(width)}x{int(height)}")
+    win.grab_set()
+    return win
 
 def run(app):
     app.mainloop()
@@ -79,10 +87,10 @@ def set_title(app, title):
     app.title(str(title))
 
 def set_size(app, width, height):
-    app.geometry(f"{width}x{height}")
+    app.geometry(f"{int(width)}x{int(height)}")
 
 def min_size(app, width, height):
-    app.minsize(width, height)
+    app.minsize(int(width), int(height))
 
 def resizable(app, width=True, height=True):
     app.resizable(bool(width), bool(height))
@@ -96,15 +104,26 @@ def close(app):
 # --- Yerlesim ---
 
 def pack(widget, side="top", fill="none", expand=False, padx=8, pady=8):
-    widget.pack(side=side, fill=fill, expand=bool(expand), padx=padx, pady=pady)
-    return widget
-
-def grid(widget, row=0, column=0, padx=8, pady=8, sticky=""):
-    widget.grid(row=row, column=column, padx=padx, pady=pady, sticky=sticky)
+    """Widget'i pack duzenine ekle."""
+    widget.pack(side=str(side), fill=str(fill), expand=bool(expand), padx=padx, pady=pady)
     return widget
 
 def hide(widget):
-    widget.pack_forget()
+    """Widget'i gizle (pack veya grid ile yonetilen her widget icin calisir)."""
+    try:
+        widget.pack_forget()
+    except Exception:
+        try:
+            widget.grid_remove()
+        except Exception:
+            pass
+
+def show(widget, side="top", fill="none", expand=False, padx=8, pady=8):
+    """Gizlenmis widget'i tekrar goster."""
+    try:
+        widget.pack(side=str(side), fill=str(fill), expand=bool(expand), padx=padx, pady=pady)
+    except Exception:
+        pass
 
 def destroy(widget):
     widget.destroy()
@@ -160,6 +179,12 @@ def entry(parent, placeholder="", width=250):
     ent.pack(pady=8, padx=12)
     return ent
 
+def password_entry(parent, placeholder="Sifre", width=250):
+    """Maskelenmis sifre giris alani."""
+    ent = _ctk.CTkEntry(parent, placeholder_text=str(placeholder), width=width, show="*")
+    ent.pack(pady=8, padx=12)
+    return ent
+
 def get_text(widget):
     return widget.get()
 
@@ -171,12 +196,16 @@ def clear(widget):
     try:
         widget.delete(0, "end")
     except Exception:
-        widget.delete("1.0", "end")
+        try:
+            widget.delete("1.0", "end")
+        except Exception:
+            pass
 
 # --- Gelismis CTK Bilesenleri ---
 
-def textbox(parent, width=360, height=180):
-    box = _ctk.CTkTextbox(parent, width=width, height=height)
+def textbox(parent, width=360, height=180, readonly=False):
+    state = "disabled" if readonly else "normal"
+    box = _ctk.CTkTextbox(parent, width=width, height=height, state=state)
     box.pack(pady=8, padx=12, fill="both", expand=True)
     return box
 
@@ -184,21 +213,33 @@ def get_box(widget):
     return widget.get("1.0", "end-1c")
 
 def set_box(widget, text):
+    widget.configure(state="normal")
     widget.delete("1.0", "end")
     widget.insert("1.0", str(text))
 
+def append_box(widget, text):
+    """Metin kutusunun sonuna yeni satir ekle."""
+    widget.configure(state="normal")
+    widget.insert("end", str(text) + "\n")
+    widget.see("end")
+
 def checkbox(parent, text, on_change=None):
-    cb = _ctk.CTkCheckBox(parent, text=str(text), command=on_change)
+    """Onay kutusu. on_change parametre almayan bir fonksiyon olabilir."""
+    cmd = (lambda: _run_callback(on_change)) if on_change else None
+    cb = _ctk.CTkCheckBox(parent, text=str(text), command=cmd)
     cb.pack(pady=8, padx=12)
     return cb
 
 def switch(parent, text, on_change=None):
-    sw = _ctk.CTkSwitch(parent, text=str(text), command=on_change)
+    """Ac/kapat anahtari. on_change parametre almayan bir fonksiyon olabilir."""
+    cmd = (lambda: _run_callback(on_change)) if on_change else None
+    sw = _ctk.CTkSwitch(parent, text=str(text), command=cmd)
     sw.pack(pady=8, padx=12)
     return sw
 
 def is_checked(widget):
-    return widget.get() == 1
+    """Onay kutusu veya anahtar acik mi?"""
+    return bool(widget.get())
 
 def set_checked(widget, checked=True):
     widget.select() if checked else widget.deselect()
@@ -218,16 +259,21 @@ def set_value(widget, value):
 def progressbar(parent, width=280):
     pb = _ctk.CTkProgressBar(parent, width=width)
     pb.set(0)
-    pb.pack(pady=8, padx=12)
+    pb.pack(pady=8, padx=12, fill="x")
     return pb
 
 def set_progress(widget, value):
-    widget.set(float(value) / 100.0)
+    """Ilerleme cububunu guncelle (0-100 arasi)."""
+    widget.set(max(0.0, min(1.0, float(value) / 100.0)))
 
 def combobox(parent, values, width=220, on_change=None):
+    """Acilir liste (salt okunur, kullanici elle yazamaz)."""
     cmd = (lambda value: _run_callback(on_change, value)) if on_change else None
-    cb = _ctk.CTkComboBox(parent, values=list(values), width=width, command=cmd)
+    cb = _ctk.CTkComboBox(parent, values=list(values), width=width,
+                          command=cmd, state="readonly")
     cb.pack(pady=8, padx=12)
+    if list(values):
+        cb.set(list(values)[0])
     return cb
 
 def optionmenu(parent, values, width=220, on_change=None):
@@ -242,6 +288,10 @@ def get_selected(widget):
 def set_selected(widget, value):
     widget.set(str(value))
 
+def update_list(widget, values):
+    """Combobox veya OptionMenu listesini guncelle."""
+    widget.configure(values=list(values))
+
 def tabview(parent):
     tv = _ctk.CTkTabview(parent)
     tv.pack(pady=8, padx=12, fill="both", expand=True)
@@ -251,11 +301,32 @@ def add_tab(tabview, name):
     tabview.add(str(name))
     return tabview.tab(str(name))
 
+def separator(parent):
+    """Yatay ayirici cizgi."""
+    import tkinter as _tk
+    sep = _tk.Frame(parent, height=1, bg="#444444")
+    sep.pack(fill="x", padx=12, pady=4)
+    return sep
+
 def set_enabled(widget, enabled=True):
     widget.configure(state="normal" if enabled else "disabled")
 
 def set_color(widget, color):
-    widget.configure(fg_color=color)
+    """Widget rengini ayarla: buton/frame icin arka plan, etiket icin yazi rengi."""
+    try:
+        widget.configure(fg_color=str(color))
+    except Exception:
+        try:
+            widget.configure(text_color=str(color))
+        except Exception:
+            pass
+
+def set_text_color(widget, color):
+    """Yazi rengini ayarla."""
+    try:
+        widget.configure(text_color=str(color))
+    except Exception:
+        pass
 
 # --- Olaylar / Dialoglar ---
 
@@ -266,6 +337,7 @@ def on_key(widget, func, key="<Return>"):
     widget.bind(str(key), lambda e: func())
 
 def event(kind, widget, func):
+    """Olay bagla: clicked, enter, changed."""
     kind = str(kind).lower()
     if kind == "clicked":
         widget.configure(command=func)
@@ -273,15 +345,18 @@ def event(kind, widget, func):
         widget.bind("<Return>", lambda e: func())
     elif kind == "changed":
         try:
+            # Slider, ComboBox, OptionMenu: command parametre alir
             widget.configure(command=lambda value=None: _run_callback(func, value))
         except Exception:
-            widget.bind("<KeyRelease>", lambda e: func())
+            # Entry gibi widget'lar: KeyRelease event'i ile dinle
+            widget.bind("<KeyRelease>", lambda e: _run_callback(func))
     else:
         widget.bind(str(kind), lambda e: func())
     return widget
 
 def after(widget, ms, func):
-    widget.after(ms, func)
+    """ms milisaniye sonra func fonksiyonunu cagir."""
+    widget.after(int(ms), func)
 
 def alert(title, message):
     import tkinter.messagebox as mb
@@ -290,6 +365,45 @@ def alert(title, message):
 def ask(title, question):
     import tkinter.messagebox as mb
     return mb.askyesno(str(title), str(question))
+
+def open_file(title="Dosya Ac", types="Tum Dosyalar:*"):
+    """Dosya secme diyalogu. Secilen dosyanin yolunu dondurur."""
+    import tkinter as _tk
+    import tkinter.filedialog as _fd
+    _root = _tk.Tk(); _root.withdraw()
+    ftypes = [(p.split(":")[0].strip(), p.split(":")[1].strip())
+              for p in str(types).split(",")] if ":" in str(types) else [("Tum Dosyalar", "*")]
+    path = _fd.askopenfilename(title=str(title), filetypes=ftypes)
+    _root.destroy()
+    return path or ""
+
+def save_file(title="Dosya Kaydet", types="Tum Dosyalar:*"):
+    """Dosya kaydetme diyalogu. Secilen yolu dondurur."""
+    import tkinter as _tk
+    import tkinter.filedialog as _fd
+    _root = _tk.Tk(); _root.withdraw()
+    ftypes = [(p.split(":")[0].strip(), p.split(":")[1].strip())
+              for p in str(types).split(",")] if ":" in str(types) else [("Tum Dosyalar", "*")]
+    path = _fd.asksaveasfilename(title=str(title), filetypes=ftypes)
+    _root.destroy()
+    return path or ""
+
+def read_file(path):
+    """Dosya icerigini oku ve dondur."""
+    try:
+        with open(str(path), "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception as e:
+        return ""
+
+def write_file(path, content):
+    """Dosyaya yaz. Basarili olursa True dondurur."""
+    try:
+        with open(str(path), "w", encoding="utf-8") as f:
+            f.write(str(content))
+        return True
+    except Exception:
+        return False
 '''
 
 # ===================== Cevirici =====================
@@ -603,9 +717,11 @@ class ModiIDE(QMainWindow):
                 cmd = [name, "--", py, str(script)]
             elif name == "konsole":
                 cmd = [name, "-e", py, str(script)]
+            elif name in ("xfce4-terminal", "xterm", "x-terminal-emulator", "lxterminal"):
+                # Bu terminaller -e ile ayri arg listesi alir
+                cmd = [name, "-e", py, str(script)]
             else:
-                # x-terminal-emulator, xfce4-terminal, xterm
-                cmd = [name, "-e", f'{py} "{script}"']
+                cmd = [name, "-e", py, str(script)]
 
             subprocess.Popen(cmd)
             self.status.showMessage("Program baslatildi.")
