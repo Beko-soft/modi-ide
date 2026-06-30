@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.spec
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Modi IDE çalışma dosyaları
+_modi_run.py
+_modi_debug.py
+
+# PyInstaller çıktıları
+/builds/
+
+# OS
+Thumbs.db
+desktop.ini
