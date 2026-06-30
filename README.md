@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>🚀 Modi IDE</h1>
+<h1> Modi IDE</h1>
 
 <p><strong>Çocuklar için Python tabanlı, Türkçe sözdizimli IDE</strong></p>
 
@@ -24,7 +24,7 @@
 
 ---
 
-## 📖 Nedir?
+##  Nedir?
 
 **Modi**, çocukların ve programlamaya yeni başlayanların kolaylıkla uygulama geliştirebilmesi için tasarlanmış, **Python tabanlı, sadeleştirilmiş bir programlama dilidir.**
 
@@ -34,29 +34,21 @@
 
 ---
 
-## ✨ Özellikler
+##  Özellikler
 
 | Özellik | Açıklama |
 |---|---|
-| 🖊️ **Akıllı Editör** | Otomatik girinti, parantez/tırnak tamamlama |
-| ▶️ **Anında Çalıştır** | Kodu doğrudan terminalde başlat (F5) |
-| 🐛 **Hata Ayıklama** | Dahili konsol çıktısı ile hata izleme (F6) |
-| 📦 **Derleme** | PyInstaller ile tek dosya `.exe` / binary üret (F7) |
-| 🎨 **GUI Desteği** | CustomTkinter ile pencere/buton/giriş/slider vb. |
-| 🔁 **Otomatik Bağımlılık** | `customtkinter` eksikse otomatik yükler |
-| 🌐 **Çapraz Platform** | Windows, Linux ve macOS desteği |
+|  **Akıllı Editör** | Otomatik girinti, parantez/tırnak tamamlama |
+|  **Anında Çalıştır** | Kodu doğrudan terminalde başlat (F5) |
+|  **Hata Ayıklama** | Dahili konsol çıktısı ile hata izleme (F6) |
+|  **Derleme** | PyInstaller ile tek dosya `.exe` / binary üret (F7) |
+|  **GUI Desteği** | CustomTkinter ile pencere/buton/giriş/slider vb. |
+|  **Otomatik Bağımlılık** | `customtkinter` eksikse otomatik yükler |
+|  **Çapraz Platform** | Windows, Linux ve macOS desteği |
 
 ---
 
-## 🖥️ Ekran Görüntüsü
-
-> Karanlık, minimalist ve odak odaklı arayüz.
-
-*(Ekran görüntüsü yakında eklenecek)*
-
----
-
-## 📦 Kurulum
+##  Kurulum
 
 ### Gereksinimler
 
@@ -79,7 +71,7 @@ python main.py
 
 ---
 
-## 🚀 Kullanım
+##  Kullanım
 
 ### IDE Kısayolları
 
@@ -95,7 +87,7 @@ Modi, çalıştırılan ve derlenen dosyaları otomatik olarak oluşturulan **`~
 
 ---
 
-## 📝 Sözdizimi Rehberi
+##  Sözdizimi Rehberi
 
 Modi sözdizimi kasıtlı olarak basit tutulmuştur. Tüm komutlar parantezle yazılır.
 
@@ -176,7 +168,7 @@ event(changed, combo, fonksiyon) // değer değişince
 
 ---
 
-## 📁 Proje Yapısı
+##  Proje Yapısı
 
 ```
 modi-ide/
@@ -189,7 +181,7 @@ modi-ide/
 
 ---
 
-## 🛠️ Nasıl Çalışır?
+##  Nasıl Çalışır?
 
 Modi kodu → **Çevirici** → Python kodu → **Python yorumlayıcı / PyInstaller**
 
@@ -205,7 +197,7 @@ event(clicked, b, f)   →   event("clicked", b, f)
 
 ---
 
-## 📋 Gereksinimler (requirements.txt)
+##  Gereksinimler (requirements.txt)
 
 ```
 PySide6>=6.5.0
@@ -215,7 +207,7 @@ PySide6>=6.5.0
 
 ---
 
-## 🤝 Katkı
+##  Katkı
 
 Katkılar her zaman memnuniyetle karşılanır!
 
@@ -227,7 +219,7 @@ Katkılar her zaman memnuniyetle karşılanır!
 
 ---
 
-## 🗺️ Yol Haritası
+##  Yol Haritası
 
 - [ ] Sözdizimi renklendirme (syntax highlighting)
 - [ ] Dosya aç / kaydet
@@ -238,12 +230,12 @@ Katkılar her zaman memnuniyetle karşılanır!
 
 ---
 
-## 📄 Lisans
+##  Lisans
 
 Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
 
 ---
 
 <div align="center">
-  <sub>Sevgiyle yapıldı 💙 — Beko-soft</sub>
+  <sub>Özenle yapıldı 💙 — Beko-soft</sub>
 </div>
